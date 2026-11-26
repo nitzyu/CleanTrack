@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A simple local record of missed barangay garbage collection.">
+  <title>CleanTrack | Waste Collection Tracker</title>
+  <style>
+    :root {
+      --navy: #172b4d;
+      --blue: #2457d6;
+      --blue-dark: #1946b5;
+      --ink: #243247;
+      --muted: #66758a;
+      --line: #e3e9f1;
+      --surface: #ffffff;
+      --page: #f4f7fb;
+      --green: #147d55;
+      --red: #b42318;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar, main, footer {
+      width: min(1080px, calc(100% - 36px));
+      margin: 0 auto;
+    }
+    .topbar {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center;
+      border-radius: 12px; background: #eaf0ff; color: var(--blue);
+      font-size: 22px; font-weight: 800;
+    }
+    .brand-name { font-size: 19px; font-weight: 800; color: var(--navy); }
+    .brand-sub { color: var(--muted); font-size: 12px; }
+    .local-tag {
+      color: var(--green); background: #e8f6ef; border-radius: 999px;
+      padding: 6px 11px; font-size: 12px; font-weight: 700;
+    }
+    main { padding: 34px 0 48px; }
+    .intro { margin-bottom: 24px; }
+    .eyebrow {
+      color: var(--blue); text-transform: uppercase; letter-spacing: .12em;
+      font-size: 11px; font-weight: 800; margin: 0 0 7px;
+    }
+    h1 { margin: 0; color: var(--navy); font-size: clamp(26px, 4vw, 36px); line-height: 1.15; }
+    .intro p { margin: 10px 0 0; color: var(--muted); max-width: 690px; }
+    .layout { display: grid; grid-template-columns: 350px 1fr; gap: 20px; align-items: start; }
+    .panel {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 22px;
+      box-shadow: 0 5px 18px rgba(24, 48, 82, .04);
+    }
+    h2 { margin: 0 0 5px; color: var(--navy); font-size: 18px; }
+    .panel-note { margin: 0 0 20px; color: var(--muted); font-size: 13px; }
+    label { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 700; }
+    input, textarea, select {
+      width: 100%; border: 1px solid #cfd8e5; border-radius: 9px;
+      padding: 11px 12px; background: white; color: var(--ink);
+      font: inherit; font-size: 14px; outline: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--blue); box-shadow: 0 0 0 3px rgba(36, 87, 214, .12);
+    }
+    textarea { min-height: 94px; resize: vertical; }
+    .hint { display: block; color: var(--muted); font-size: 11px; margin-top: 5px; }
+    button {
+      border: 0; border-radius: 9px; padding: 11px 15px; cursor: pointer;
+      font: inherit; font-size: 14px; font-weight: 700;
+      transition: background .15s ease;
+    }
+    button:focus-visible { outline: 3px solid #9bb5ff; outline-offset: 2px; }
+    .primary { width: 100%; margin-top: 18px; color: white; background: var(--blue); }
+    .primary:hover { background: var(--blue-dark); }
+    .delete-btn { padding: 7px 10px; color: var(--red); background: #fff0ef; font-size: 12px; }
+    .delete-btn:hover { background: #ffe1df; }
+    .message { display: none; padding: 10px 12px; margin-top: 14px; border-radius: 8px; font-size: 13px; }
+    .message.success { display: block; color: #126341; background: #e8f6ef; }
+    .message.error { display: block; color: #9d2118; background: #fff0ef; }
+    .list-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .count { background: #edf2ff; color: var(--blue); border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 800; }
+    .report-list { display: grid; gap: 11px; }
+    .report {
+      border: 1px solid var(--line); border-radius: 11px; padding: 14px;
+      display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start;
+    }
+    .report-place { margin: 0; color: var(--navy); font-size: 14px; font-weight: 800; }
+    .report-meta { margin: 3px 0 8px; color: var(--muted); font-size: 11px; }
+    .report-description { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+    .empty {
+      border: 1px dashed #cbd5e1; border-radius: 11px; padding: 30px 18px;
+      text-align: center; color: var(--muted); font-size: 13px;
+    }
+    .empty strong { display: block; color: var(--navy); font-size: 14px; margin-bottom: 4px; }
+    .privacy-note { margin: 16px 0 0; padding: 12px; background: #f6f8fc; border-radius: 9px; color: var(--muted); font-size: 11px; }
+    footer { padding: 0 0 25px; color: var(--muted); font-size: 11px; text-align: center; }
+    @media (max-width: 760px) {
+      .layout { grid-template-columns: 1fr; }
+      main { padding-top: 26px; }
+      .topbar { min-height: 68px; }
+      .panel { padding: 18px; }
+    }
+    @media (max-width: 420px) {
+      .topbar, main, footer { width: min(100% - 24px, 1080px); }
+      .local-tag { font-size: 10px; padding: 5px 8px; }
+      .report { grid-template-columns: 1fr; }
+      .delete-btn { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">CT</div>
+        <div>
+          <div class="brand-name">CleanTrack</div>
+          <div class="brand-sub">Barangay Waste Collection Tracker</div>
+        </div>
+      </div>
+      <span class="local-tag">Saved on this device</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <p class="eyebrow">Community record tool</p>
+      <h1>Keep a record of missed garbage collection.</h1>
+      <p>Record the location and details of a missed pickup. Your entries stay in this browser so you can review them later.</p>
+    </section>
+
+    <div class="layout">
+      <section class="panel" aria-labelledby="form-title">
+        <h2 id="form-title">Add a collection report</h2>
+        <p class="panel-note">Enter the details of one missed collection.</p>
+        <form id="report-form" novalidate>
+          <label for="location">Street or area</label>
+          <input id="location" name="location" type="text" maxlength="70" placeholder="e.g. Purok 2, Rizal Street" required>
+          <span class="hint">Use a street, purok, or recognizable area.</span>
+
+          <label for="date">Date of missed collection</label>
+          <input id="date" name="date" type="date" required>
+
+          <label for="description">What happened?</label>
+          <textarea id="description" name="description" maxlength="240" placeholder="Briefly describe the collection concern." required></textarea>
+          <span class="hint">Maximum 240 characters.</span>
+
+          <button class="primary" type="submit">Save report</button>
+          <div id="form-message" class="message" role="status" aria-live="polite"></div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="list-title">
+        <div class="list-head">
+          <div>
+            <h2 id="list-title">Saved reports</h2>
+            <p class="panel-note" style="margin-bottom:0">Reports stored in this browser.</p>
+          </div>
+          <span id="report-count" class="count">0 reports</span>
+        </div>
+        <div id="report-list" class="report-list" aria-live="polite"></div>
+        <p class="privacy-note">Local storage note: reports remain on this device and browser. They are not sent to barangay officials or shared with other residents. Avoid entering private personal information.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer>CleanTrack · Lab 1: Your Own Community Web App</footer>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "cleantrack_reports_v1";
+    const form = document.getElementById("report-form");
+    const locationInput = document.getElementById("location");
+    const dateInput = document.getElementById("date");
+    const descriptionInput = document.getElementById("description");
+    const messageBox = document.getElementById("form-message");
+    const reportList = document.getElementById("report-list");
+    const reportCount = document.getElementById("report-count");
+
+    function loadReports() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return [];
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        showMessage("Saved data could not be read. Check browser storage settings.", "error");
+        return [];
+      }
+    }
+
+    function saveReports(reports) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reports));
+        return true;
+      } catch (error) {
+        showMessage("Your report was not saved. Browser storage might be full or unavailable.", "error");
+        return false;
+      }
+    }
+
+    function showMessage(message, type) {
+      messageBox.textContent = message;
+      messageBox.className = "message " + type;
+    }
+
+    function formatDate(value) {
+      const parts = value.split("-");
+      return new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]))
+        .toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
+    }
+
+    function renderReports() {
+      const reports = loadReports();
+      reportCount.textContent = reports.length + (reports.length === 1 ? " report" : " reports");
+      reportList.replaceChildren();
+
+      if (reports.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        const title = document.createElement("strong");
+        title.textContent = "No reports saved yet";
+        const detail = document.createElement("span");
+        detail.textContent = "Your saved collection reports will appear here.";
+        empty.append(title, detail);
+        reportList.append(empty);
+        return;
+      }
+
+      reports.slice().reverse().forEach((report) => {
+        const card = document.createElement("article");
+        card.className = "report";
+
+        const content = document.createElement("div");
+        const place = document.createElement("h3");
+        place.className = "report-place";
+        place.textContent = report.location;
+        const meta = document.createElement("p");
+        meta.className = "report-meta";
+        meta.textContent = "Missed collection · " + formatDate(report.date);
+        const description = document.createElement("p");
+        description.className = "report-description";
+        description.textContent = report.description;
+        content.append(place, meta, description);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "delete-btn";
+        deleteButton.type = "button";
+        deleteButton.textContent = "Delete";
+        deleteButton.setAttribute("aria-label", "Delete report for " + report.location);
+        deleteButton.addEventListener("click", () => deleteReport(report.id));
+
+        card.append(content, deleteButton);
+        reportList.append(card);
+      });
+    }
+
+    function deleteReport(id) {
+      const reports = loadReports();
+      const updated = reports.filter((report) => report.id !== id);
+      if (updated.length === reports.length) return;
+      if (saveReports(updated)) {
+        showMessage("Report deleted.", "success");
+        renderReports();
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const location = locationInput.value.trim();
+      const date = dateInput.value;
+      const description = descriptionInput.value.trim();
+
+      if (!location || !date || !description) {
+        showMessage("Complete all fields before saving.", "error");
+        return;
+      }
+      if (location.length < 3) {
+        showMessage("Enter an area name with at least 3 characters.", "error");
+        locationInput.focus();
+        return;
+      }
+      if (description.length < 5) {
+        showMessage("Add a description with at least 5 characters.", "error");
+        descriptionInput.focus();
+        return;
+      }
+      if (Number.isNaN(Date.parse(date))) {
+        showMessage("Enter a valid collection date.", "error");
+        dateInput.focus();
+        return;
+      }
+
+      const reports = loadReports();
+      reports.push({
+        id: (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2),
+        location,
+        date,
+        description,
+        createdAt: new Date().toISOString()
+      });
+
+      if (saveReports(reports)) {
+        form.reset();
+        showMessage("Your collection report was saved on this device.", "success");
+        renderReports();
+      }
+    });
+
+    renderReports();
+  </script>
+</body>
+</html>
