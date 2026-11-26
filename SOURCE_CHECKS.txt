@@ -1,0 +1,10 @@
+Source-level checks performed during package generation:
+[PASS] single HTML document
+[PASS] embedded CSS
+[PASS] embedded JavaScript
+[PASS] localStorage read/write
+[PASS] form validation
+[PASS] responsive CSS
+[PASS] delete action
+
+These checks do not replace browser testing.
